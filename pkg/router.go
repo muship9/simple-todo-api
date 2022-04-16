@@ -1,8 +1,15 @@
 package pkg
 
 import (
-	"fmt"
 	"net/http"
+)
+
+// これは無意味な定義かもしれない
+const (
+	GET    = "GET"
+	POST   = "POST"
+	PUT    = "PUT"
+	DELETE = "DELETE"
 )
 
 type Router interface {
@@ -11,13 +18,16 @@ type Router interface {
 
 func HandleTodosRequest(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
-	case "GET":
-		fmt.Println("GET")
-	case "POST":
-		fmt.Println("POST")
-	case "PUT":
-		fmt.Println("PUT")
-	case "DELETE":
-		fmt.Println("DELETE")
+	case GET:
+		GetTodos()
+	case POST:
+		PostTodo()
+	case PUT:
+		PutTodo()
+	case DELETE:
+		DeleteTodo()
+	default:
+		// 指定メソッド以外はアクションを実行しない
+		w.WriteHeader(405)
 	}
 }

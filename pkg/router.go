@@ -1,6 +1,8 @@
 package pkg
 
 import (
+	"database/sql"
+	"log"
 	"net/http"
 )
 
@@ -17,9 +19,13 @@ type Router interface {
 }
 
 func HandleTodosRequest(w http.ResponseWriter, r *http.Request) {
+	db, err := sql.Open("postgres", "user=admin password=admin dbname=simpleTodoDb sslmode=disable")
+	if err != nil {
+		log.Fatal(err)
+	}
 	switch r.Method {
 	case GET:
-		GetTodos()
+		GetTodos(db)
 	case POST:
 		PostTodo()
 	case PUT:

@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 	"net/http"
 	"simple-todo-api/pkg"
@@ -16,12 +17,11 @@ var Db *sql.DB
 func init() {
 	log.Println("Start DB")
 	var err error
-	Db, err = sql.Open("postgres", "user=admin password=admin dbname=simpleTodoDb sslmode=disable")
+	Db, err = sql.Open("postgres", "host=localhost user=admin password=admin dbname=simpleTodoDb sslmode=disable")
+	fmt.Println(&Db)
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	log.Println(Db)
 }
 
 // メイン関数
@@ -31,7 +31,7 @@ func main() {
 		Addr: ":8080",
 	}
 
-	log.Println("Start Server")
+	log.Print("start server")
 
 	http.HandleFunc("/todos", pkg.HandleTodosRequest)
 	server.ListenAndServe()

@@ -1,7 +1,7 @@
 --
 -- テーブルの作成
 --
-CREATE TABLE user
+CREATE TABLE user_profile
 (
     user_id    VARCHAR(50) NOT NULL,
     name       VARCHAR(50) NOT NULL,
@@ -11,10 +11,10 @@ CREATE TABLE user
 
 CREATE TABLE todos
 (
-    todo_id    UUID        NOT NULL DEFAULT gen_random_ulid(),
+    todo_id    VARCHAR(50) NOT NULL,
     name       VARCHAR(50) NOT NULL,
     user_id    VARCHAR(50) NOT NULL,
     created_at TIMESTAMP   NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP   NOT NULL DEFAULT NOW(),
-    FOREIGN KEY (user_id) REFERENCES companies (user_id) ON DELETE CASCADE
+    FOREIGN KEY (user_id) REFERENCES user_profile (user_id)
 );

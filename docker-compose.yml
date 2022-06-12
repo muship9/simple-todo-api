@@ -18,7 +18,7 @@ services:
       - DB_WRITER_HOST=db
       - DB_READER_HOST=db
       - DB_PORT=5432
-      - DB_USERNAME=admin
+      - DB_USERNAME=simpleTodoDb
       - DB_PASSWORD=password
       - DB_DATABASE=simpleTodoDb
 
@@ -30,12 +30,17 @@ services:
     ports:
       - "5432:5432"
     environment:
-      - POSTGRES_USER=admin
-      - POSTGRES_PASSWORD=admin
+      - POSTGRES_USER=simpleTodoDb
+      - POSTGRES_PASSWORD=password
       - POSTGRES_DB=simpleTodoDb
     volumes:
       - db_data:/var/lib/postgresql/data
       - ./docker/postgres/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: "psql -h localhost -U simpleTodoDb -c 'SELECT  1'"
+      interval: 1s
+      timeout: 3s
+      retries: 30
 
 volumes:
   db_data:

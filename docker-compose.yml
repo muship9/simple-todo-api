@@ -21,6 +21,9 @@ services:
       - DB_USERNAME=simpleTodoDb
       - DB_PASSWORD=password
       - DB_DATABASE=simpleTodoDb
+    depends_on:
+      db:
+        condition: service_healthy
 
   # DB
   db:

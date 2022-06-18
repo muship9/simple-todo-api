@@ -19,14 +19,13 @@ type Router interface {
 }
 
 func HandleTodosRequest(w http.ResponseWriter, r *http.Request) {
-	db, err := sql.Open("postgres", "host=localhost user=admin password=admin dbname=simpleTodoDb sslmode=disable")
-	log.Print(&r)
+	db, err := sql.Open("postgres", "host=db user=simpleTodoDb password=password dbname=simpleTodoDb sslmode=disable")
 	if err != nil {
 		log.Fatal(err)
 	}
 	switch r.Method {
 	case GET:
-		GetTodos(db)
+		GetTodos(db, w)
 	case POST:
 		PostTodo()
 	case PUT:

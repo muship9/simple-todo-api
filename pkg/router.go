@@ -1,8 +1,6 @@
 package pkg
 
 import (
-	"database/sql"
-	"log"
 	"net/http"
 )
 
@@ -19,19 +17,15 @@ type Router interface {
 }
 
 func HandleTodosRequest(w http.ResponseWriter, r *http.Request) {
-	db, err := sql.Open("postgres", "host=db user=simpleTodoDb password=password dbname=simpleTodoDb sslmode=disable")
-	if err != nil {
-		log.Fatal(err)
-	}
 	switch r.Method {
 	case GET:
-		GetTodos(db, w)
+		GetTodos(Db, w)
 	case POST:
-		PostTodo()
+		AddTodo(Db)
 	case PUT:
-		PutTodo()
+		EditTodo(Db)
 	case DELETE:
-		DeleteTodo()
+		DeleteTodo(Db)
 	default:
 		// 指定メソッド以外はアクションを実行しない
 		w.WriteHeader(405)

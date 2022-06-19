@@ -1,7 +1,6 @@
 package pkg
 
 import (
-	"bytes"
 	"database/sql"
 	"encoding/json"
 	"fmt"
@@ -11,56 +10,59 @@ import (
 )
 
 type Todos struct {
-	id         int
+	todoId     string
 	name       string
-	todo       string
+	userId     string
 	created_at string
+	updated_at string
 }
 
 type EncodeTodo struct {
-	id         int       `json:"id"`
+	todoId     string    `json:"id"`
 	name       string    `json:"name"`
-	todo       string    `json:"todo"`
+	userId     string    `json:"todo"`
 	created_at time.Time `json:"due_date"`
+	updated_at time.Time `json:"due_date"`
 }
 
 // GetTodos DB からデータを全件取得して一覧を返す
 func GetTodos(db *sql.DB, w http.ResponseWriter) {
-	log.Println("GET")
-	rows, err := db.Query("SELECT * FROM simpleTodoDb")
+	rows, err := db.Query("SELECT * FROM todos WHERE user_id = 'testUser'")
 	if err != nil {
 		log.Println(err)
 	}
-	var t Todos
+	var todoResponses Todos
 	for rows.Next() {
-		if err := rows.Scan(&t.id, &t.name, &t.todo, &t.created_at); err != nil {
+		if err := rows.Scan(&todoResponses.todoId, &todoResponses.name, &todoResponses.userId, &todoResponses.created_at, &todoResponses.updated_at); err != nil {
 			log.Println(err)
 		}
-		fmt.Printf("[%d]  Name:%s TODO:%s 作成日時:%s\n", t.id, t.name, t.todo, t.created_at)
 	}
 	rows.Close()
+	log.Println(todoResponses)
 
-	// 取得されたデータを JSON に変換し、レスポンスとして返却する
-	var buf bytes.Buffer
-	enc := json.NewEncoder(&buf)
-	if err := enc.Encode(&t); err != nil {
-		log.Fatal(err)
-	}
-	fmt.Fprint(w, buf.String())
+	output, _ := json.MarshalIndent(todoResponses, "", "\t\t")
+	log.Println(output)
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	w.Write(output)
 
 }
 
 // PostTodo クライアントから送られてきたデータをもとに DB に追加
-func PostTodo() {
+func AddTodo(db *sql.DB) {
 	fmt.Println("POST")
+	fmt.Println(db)
 }
 
 // PutTodo クライアントから送られてきたデータをもとに DB を更新する
-func PutTodo() {
+func EditTodo(db *sql.DB) {
 	fmt.Println("PUT")
+	fmt.Println(db)
 }
 
 // DeleteTodo 指定データを DB から削除する
-func DeleteTodo() {
+func DeleteTodo(db *sql.DB) {
 	fmt.Println("DELETE")
+	fmt.Println(db)
 }

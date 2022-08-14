@@ -5,13 +5,15 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"math/rand"
 	"net/http"
+	"strconv"
 	"time"
 )
 
 type Todos struct {
 	todoId     string
-	name       string
+	title      string
 	userId     string
 	created_at time.Time
 	updated_at time.Time
@@ -19,8 +21,13 @@ type Todos struct {
 
 type EncodeTodo struct {
 	TodoId string `json:"id"`
-	Name   string `json:"name"`
+	Title  string `json:"title"`
 	UserId string `json:"todo"`
+}
+
+type TodoRequest struct {
+	Title  string `json:"title"`
+	UserId string `json:"user_id"`
 }
 
 // GetTodos DB からデータを全件取得して一覧を返す
@@ -39,7 +46,7 @@ func GetTodos(db *sql.DB, w http.ResponseWriter) {
 	// 1行ごとTODOにEntityをマッピングし、返却用のスライスに追加
 	for rows.Next() {
 		todo := Todos{}
-		err = rows.Scan(&todo.todoId, &todo.name, &todo.userId, &todo.created_at, &todo.updated_at)
+		err = rows.Scan(&todo.todoId, &todo.title, &todo.userId, &todo.created_at, &todo.updated_at)
 		if err != nil {
 			log.Print(err)
 			return
@@ -52,7 +59,7 @@ func GetTodos(db *sql.DB, w http.ResponseWriter) {
 	for _, v := range data {
 		todoResponses = append(todoResponses, EncodeTodo{
 			TodoId: v.todoId,
-			Name:   v.name,
+			Title:  v.title,
 			UserId: v.userId,
 		})
 	}
@@ -64,8 +71,36 @@ func GetTodos(db *sql.DB, w http.ResponseWriter) {
 }
 
 // AddTodo クライアントから送られてきたデータをもとに DB に追加
-func AddTodo(db *sql.DB) {
-	fmt.Println("POST", db)
+func AddTodo(db *sql.DB, w http.ResponseWriter, r *http.Request) {
+	var err error
+	body := make([]byte, r.ContentLength)
+	r.Body.Read(body)
+
+	var todoRequest TodoRequest
+
+	err = json.Unmarshal(body, &todoRequest)
+	if err != nil {
+		w.WriteHeader(500)
+		w.Write([]byte("Connection Failed"))
+		return
+	}
+
+	todo := Todos{
+		todoId: strconv.Itoa(rand.Int()) + "_todo",
+		title:  todoRequest.Title,
+		userId: todoRequest.UserId,
+	}
+
+	_, err = db.Exec("INSERT INTO todos (todo_id , title , user_id) VALUES ($1, $2 ,$3)", todo.todoId, todo.title, todo.userId)
+	if err != nil {
+		log.Print(err)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	w.Write([]byte("success"))
+
 }
 
 // EditTodo クライアントから送られてきたデータをもとに DB を更新する

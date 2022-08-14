@@ -21,7 +21,7 @@ func HandleTodosRequest(w http.ResponseWriter, r *http.Request) {
 	case GET:
 		GetTodos(Db, w)
 	case POST:
-		AddTodo(Db)
+		AddTodo(Db, w, r)
 	case PUT:
 		EditTodo(Db)
 	case DELETE:

@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"github.com/google/uuid"
 	"log"
 	"math/rand"
 	"net/http"
@@ -26,6 +27,7 @@ type EncodeTodo struct {
 }
 
 type TodoRequest struct {
+	TodoId string `json:"todoId"`
 	Title  string `json:"title"`
 	UserId string `json:"user_id"`
 }
@@ -72,6 +74,7 @@ func GetTodos(db *sql.DB, w http.ResponseWriter) {
 
 // AddTodo クライアントから送られてきたデータをもとに DB に追加
 func AddTodo(db *sql.DB, w http.ResponseWriter, r *http.Request) {
+	var todo Todos
 	var err error
 	body := make([]byte, r.ContentLength)
 	r.Body.Read(body)
@@ -85,8 +88,12 @@ func AddTodo(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	todo := Todos{
-		todoId: strconv.Itoa(rand.Int()) + "_todo",
+	if todoRequest.TodoId == "" {
+		todoRequest.TodoId = strconv.Itoa(rand.Int()) + "_todo"
+	}
+
+	todo = Todos{
+		todoId: uuid.NewString(),
 		title:  todoRequest.Title,
 		userId: todoRequest.UserId,
 	}

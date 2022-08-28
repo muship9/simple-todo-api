@@ -3,7 +3,6 @@ package pkg
 import (
 	"database/sql"
 	"encoding/json"
-	"fmt"
 	"github.com/google/uuid"
 	"log"
 	"net/http"
@@ -156,6 +155,43 @@ func EditTodo(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 }
 
 // DeleteTodo 指定データを DB から削除する
-func DeleteTodo(db *sql.DB) {
-	fmt.Println("DELETE", db)
+func DeleteTodo(db *sql.DB, w http.ResponseWriter, r *http.Request) {
+	var todo Todos
+	var err error
+	body := make([]byte, r.ContentLength)
+	r.Body.Read(body)
+
+	var todoRequest TodoRequest
+
+	err = json.Unmarshal(body, &todoRequest)
+	if err != nil {
+		w.WriteHeader(500)
+		w.Write([]byte("Connection Failed"))
+		return
+	}
+
+	todo = Todos{
+		todoId: todoRequest.TodoId,
+		title:  todoRequest.Title,
+		userId: todoRequest.UserId,
+	}
+
+	if todo.todoId == "" {
+		w.WriteHeader(400)
+		w.Write([]byte("TodoId がないため処理を中断します。"))
+		return
+	}
+
+	_, err = db.Exec("DELETE FROM todos WHERE todo_id = $1", todo.todoId)
+
+	if err != nil {
+		w.WriteHeader(500)
+		w.Write([]byte("Connection failed"))
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(201)
+	w.Write([]byte("success"))
+
 }

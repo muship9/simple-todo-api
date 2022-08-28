@@ -23,7 +23,7 @@ func HandleTodosRequest(w http.ResponseWriter, r *http.Request) {
 	case POST:
 		AddTodo(Db, w, r)
 	case PUT:
-		EditTodo(Db)
+		EditTodo(Db, w, r)
 	case DELETE:
 		DeleteTodo(Db)
 	default:

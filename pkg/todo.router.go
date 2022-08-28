@@ -6,9 +6,7 @@ import (
 	"fmt"
 	"github.com/google/uuid"
 	"log"
-	"math/rand"
 	"net/http"
-	"strconv"
 	"time"
 )
 
@@ -30,6 +28,11 @@ type TodoRequest struct {
 	TodoId string `json:"todoId"`
 	Title  string `json:"title"`
 	UserId string `json:"user_id"`
+}
+
+type EditTodoRequest struct {
+	TodoId string `json:"todoId"`
+	Title  string `json:"title"`
 }
 
 // GetTodos DB からデータを全件取得して一覧を返す
@@ -89,11 +92,11 @@ func AddTodo(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 	}
 
 	if todoRequest.TodoId == "" {
-		todoRequest.TodoId = strconv.Itoa(rand.Int()) + "_todo"
+		todoRequest.TodoId = uuid.NewString()
 	}
 
 	todo = Todos{
-		todoId: uuid.NewString(),
+		todoId: todoRequest.TodoId,
 		title:  todoRequest.Title,
 		userId: todoRequest.UserId,
 	}
@@ -111,8 +114,45 @@ func AddTodo(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 }
 
 // EditTodo クライアントから送られてきたデータをもとに DB を更新する
-func EditTodo(db *sql.DB) {
-	fmt.Println("PUT", db)
+func EditTodo(db *sql.DB, w http.ResponseWriter, r *http.Request) {
+	var todos Todos
+	var err error
+	body := make([]byte, r.ContentLength)
+	r.Body.Read(body)
+
+	var editTodoRequest EditTodoRequest
+
+	err = json.Unmarshal(body, &editTodoRequest)
+	if err != nil {
+		w.WriteHeader(500)
+		w.Write([]byte("Connection Failed"))
+		return
+	}
+
+	todos = Todos{
+		todoId: editTodoRequest.TodoId,
+		title:  editTodoRequest.Title,
+	}
+
+	if todos.todoId == "" {
+		w.WriteHeader(400)
+		w.Write([]byte("TodoId がないため処理を中断します。"))
+		return
+	}
+
+	// TODO : user_id でも一致させる
+	_, err = db.Exec("UPDATE todos SET title = $1 WHERE todo_id = $2", todos.title, todos.todoId)
+
+	if err != nil {
+		w.WriteHeader(500)
+		w.Write([]byte("Connection failed"))
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(201)
+	w.Write([]byte("success"))
+
 }
 
 // DeleteTodo 指定データを DB から削除する

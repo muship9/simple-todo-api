@@ -37,7 +37,6 @@ type EditTodoRequest struct {
 // GetTodos DB からデータを全件取得して一覧を返す
 func GetTodos(db *sql.DB, w http.ResponseWriter) {
 
-	// TODO : リファクタ -> DB からデータを取得する箇所を切り出したい
 	// DB から一致する data を取得
 	rows, err := db.Query("SELECT * FROM todos WHERE user_id = 'testUser'")
 
@@ -139,7 +138,6 @@ func EditTodo(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// TODO : user_id でも一致させる
 	_, err = db.Exec("UPDATE todos SET title = $1 WHERE todo_id = $2", todos.title, todos.todoId)
 
 	if err != nil {

@@ -4,7 +4,6 @@ import (
 	"net/http"
 )
 
-// これは無意味な定義かもしれない
 const (
 	GET    = "GET"
 	POST   = "POST"

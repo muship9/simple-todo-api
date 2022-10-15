@@ -37,7 +37,7 @@ type EditTodoRequest struct {
 // GetTodos DB からデータを全件取得して一覧を返す
 func GetTodos(db *sql.DB, w http.ResponseWriter) {
 
-	// DB から一致する data を取得
+	// DB から一致する data を取得 -> リクエストした userId を使って取得に変更する
 	rows, err := db.Query("SELECT * FROM todos WHERE user_id = 'testUser'")
 
 	if err != nil {
@@ -46,7 +46,7 @@ func GetTodos(db *sql.DB, w http.ResponseWriter) {
 
 	var data []Todos
 
-	// 1行ごとTODOにEntityをマッピングし、返却用のスライスに追加
+	// TODOにEntityをマッピングし、返却用のスライスに追加
 	for rows.Next() {
 		todo := Todos{}
 		err = rows.Scan(&todo.todoId, &todo.title, &todo.userId, &todo.created_at, &todo.updated_at)
